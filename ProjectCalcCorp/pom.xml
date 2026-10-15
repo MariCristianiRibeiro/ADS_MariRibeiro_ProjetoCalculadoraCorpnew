@@ -19,6 +19,15 @@
             <version>${jakartaee}</version>
             <scope>provided</scope>
         </dependency>
+        
+        <!-- https://mvnrepository.com/artifact/org.primefaces/primefaces -->
+        <dependency>
+            <groupId>org.primefaces</groupId>
+            <artifactId>primefaces</artifactId>
+            <version>13.0.6</version>
+            <classifier>jakarta</classifier>
+        </dependency>
+        
     </dependencies>
     
     <build>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/XHtml.xhtml to edit this template
+-->
+<ui:composition template="/WEB-INF/template.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <ui:define name="corpo">
+        <p:growl id="msgs" showDetail="true"/>
+
+        <h:form id="formCadastro">
+            <p:panel header="Calculadora e Agendamento de Reuniões Corporativas">
+                <h:panelGrid columns="2" cellpadding="5" id="gridCampos">
+                    <p:outputLabel value="Solicitante:" for="colab"/>
+                    <p:selectOneMenu id="colab" value="#{agendamentoBean.entidade.solicitante}" required="true" requiredMessage="Selecione o solicitante">
+                        <f:selectItem itemLabel="Selecione..." itemValue=""/>
+                        <f:selectItems value="#{colaboradorBean.lista}" var="c" itemLabel="#{c.nome} (#{c.matricula})" itemValue="#{c}"/>
+                    </p:selectOneMenu>
+
+                    <p:outputLabel value="Sala de Reunião:" for="sala"/>
+                    <p:selectOneMenu id="sala" value="#{agendamentoBean.entidade.sala}" required="true" requiredMessage="Selecione a sala">
+                        <f:selectItem itemLabel="Selecione..." itemValue=""/>
+                        <f:selectItems value="#{salaReuniaoBean.lista}" var="s" itemLabel="#{s.nome} - R$ #{s.valorHora}/h" itemValue="#{s}"/>
+                        <p:ajax listener="#{agendamentoBean.calcularCustoEHoras}" update="lblDuracao lblCusto"/>
+                    </p:selectOneMenu>
+
+                    <p:outputLabel value="Data/Hora Início:" for="dtIni"/>
+                    <p:datePicker id="dtIni" value="#{agendamentoBean.entidade.dataHoraInicio}" showTime="true" pattern="dd/MM/yyyy HH:mm" required="true">
+                        <p:ajax event="dateSelect" listener="#{agendamentoBean.calcularCustoEHoras}" update="lblDuracao lblCusto"/>
+                    </p:datePicker>
+
+                    <p:outputLabel value="Data/Hora Término:" for="dtFim"/>
+                    <p:datePicker id="dtFim" value="#{agendamentoBean.entidade.dataHoraFim}" showTime="true" pattern="dd/MM/yyyy HH:mm" required="true">
+                        <p:ajax event="dateSelect" listener="#{agendamentoBean.calcularCustoEHoras}" update="lblDuracao lblCusto"/>
+                    </p:datePicker>
+
+                    <p:outputLabel value="Tipo da Reunião:" for="tipo"/>
+                    <p:selectOneMenu id="tipo" value="#{agendamentoBean.entidade.tipo}">
+                        <f:selectItems value="#{agendamentoBean.listaTipos}" var="t" itemLabel="#{t.descricao}" itemValue="#{t}"/>
+                    </p:selectOneMenu>
+
+                    <p:outputLabel value="Status:" for="status"/>
+                    <p:selectOneMenu id="status" value="#{agendamentoBean.entidade.status}">
+                        <f:selectItems value="#{agendamentoBean.listaStatus}" var="st" itemLabel="#{st.descricao}" itemValue="#{st}"/>
+                    </p:selectOneMenu>
+
+                    <p:outputLabel value="Recursos Tecnológicos:" for="recursos"/>
+                    <p:selectCheckboxMenu id="recursos" value="#{agendamentoBean.entidade.recursos}" label="Selecione Recursos" multiple="true" filter="true">
+                        <f:selectItems value="#{recursoTecnologicoBean.lista}" var="r" itemLabel="#{r.nome}" itemValue="#{r}"/>
+                        <p:ajax listener="#{agendamentoBean.calcularCustoEHoras}" update="lblCusto"/>
+                    </p:selectCheckboxMenu>
+
+                    <p:outputLabel value="Duração Calculada:"/>
+                    <h:outputText id="lblDuracao" value="#{agendamentoBean.entidade.duracaoHoras} h" style="font-weight:bold; color:#0288d1;"/>
+
+                    <p:outputLabel value="Custo Total Estimado:"/>
+                    <h:outputText id="lblCusto" value="R$ #{agendamentoBean.entidade.custoTotal}" style="font-weight:bold; color:#2e7d32; font-size: 1.2em;"/>
+                </h:panelGrid>
+
+                <p:commandButton value="Salvar Agendamento" action="#{agendamentoBean.salvar}" update="formCadastro :formTabela:dtAgendamentos msgs" icon="pi pi-save" style="margin-top:10px;"/>
+            </p:panel>
+        </h:form>
+
+        <br/>
+
+        <h:form id="formTabela">
+            <p:dataTable id="dtAgendamentos" value="#{agendamentoBean.lista}" var="a" paginator="true" rows="10">
+                <p:column headerText="ID" sortBy="#{a.id}"><h:outputText value="#{a.id}"/></p:column>
+                <p:column headerText="Solicitante"><h:outputText value="#{a.solicitante.nome}"/></p:column>
+                <p:column headerText="Sala"><h:outputText value="#{a.sala.nome}"/></p:column>
+                <p:column headerText="Duração"><h:outputText value="#{a.duracaoHoras} h"/></p:column>
+                <p:column headerText="Custo Total"><h:outputText value="R$ #{a.custoTotal}"/></p:column>
+                <p:column headerText="Status"><h:outputText value="#{a.status.descricao}"/></p:column>
+                <p:column headerText="Ações">
+                    <p:commandButton icon="pi pi-pencil" action="#{agendamentoBean.setEntidade(a)}" update=":formCadastro" styleClass="ui-button-warning"/>
+                    <p:commandButton icon="pi pi-trash" action="#{agendamentoBean.excluir(a)}" update=":formTabela:dtAgendamentos :msgs" styleClass="ui-button-danger" style="margin-left: 5px;"/>
+                </p:column>
+            </p:dataTable>
+        </h:form>
+    </ui:define>
+</ui:composition>
