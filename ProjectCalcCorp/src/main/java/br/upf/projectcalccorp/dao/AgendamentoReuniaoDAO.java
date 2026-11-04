@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package br.upf.projectcalccorp.dao;
 
 import br.upf.projectcalccorp.model.AgendamentoReuniao;
@@ -12,7 +8,8 @@ import jakarta.persistence.PersistenceContext;
 @Stateless
 public class AgendamentoReuniaoDAO extends GenericDAO<AgendamentoReuniao> {
 
-    @PersistenceContext(unitName = "GestaoReunioesPU")
+    // CORREÇÃO: unitName aponta exatamente para "ProjectCalcCorp" do persistence.xml
+    @PersistenceContext(unitName = "ProjectCalcCorp")
     private EntityManager em;
 
     public AgendamentoReuniaoDAO() {

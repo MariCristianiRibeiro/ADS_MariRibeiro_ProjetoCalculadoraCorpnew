@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package br.upf.projectcalccorp.dao;
 
 import br.upf.projectcalccorp.model.RecursoTecnologico;
@@ -13,7 +9,7 @@ import java.util.List;
 @Stateless
 public class RecursoTecnologicoDAO extends GenericDAO<RecursoTecnologico> {
 
-    @PersistenceContext(unitName = "GestaoReunioesPU")
+    @PersistenceContext(unitName = "ProjectCalcCorp")
     private EntityManager em;
 
     public RecursoTecnologicoDAO() {
@@ -25,12 +21,14 @@ public class RecursoTecnologicoDAO extends GenericDAO<RecursoTecnologico> {
         return em;
     }
 
+    // ADICIONADO: Método de busca por nome exigido pelo RecursoTecnologicoBean
     public List<RecursoTecnologico> buscarPorNome(String nome) {
         if (nome == null || nome.trim().isEmpty()) {
             return findAll();
         }
-        return em.createQuery("SELECT r FROM RecursoTecnologico r WHERE LOWER(r.nome) LIKE :nome", RecursoTecnologico.class)
-                 .setParameter("nome", "%" + nome.toLowerCase() + "%")
-                 .getResultList();
+        return em.createQuery(
+            "SELECT r FROM RecursoTecnologico r WHERE LOWER(r.nome) LIKE LOWER(:nome)", RecursoTecnologico.class)
+            .setParameter("nome", "%" + nome.trim() + "%")
+            .getResultList();
     }
 }

@@ -1,43 +1,71 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package br.upf.projectcalccorp.bean;
 
-import jakarta.enterprise.context.SessionScoped;
+import br.upf.projectcalccorp.dao.ColaboradorDAO;
+import br.upf.projectcalccorp.model.Colaborador;
+import jakarta.ejb.EJB;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
 import java.io.Serializable;
 
 @Named("loginBean")
-@SessionScoped
+@RequestScoped
 public class LoginBean implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private String usuario;
     private String senha;
-    private String usuarioLogado;
 
-    public String autenticar() {
-        if ("admin".equalsIgnoreCase(usuario) && "admin123".equals(senha)) {
-            usuarioLogado = usuario;
-            FacesContext.getCurrentInstance().getExternalContext().getSessionMap().put("usuarioLogado", usuarioLogado);
-            return "/admin/agendamento.xhtml?faces-redirect=true";
+    @EJB
+    private ColaboradorDAO colaboradorDAO;
+
+    public LoginBean() {
+    }
+
+    public void autenticar() {
+        System.out.println(">>> LOGIN: Tentativa de autenticação com o utilizador: " + usuario);
+        
+        Colaborador colaborador = colaboradorDAO.autenticar(usuario, senha);
+
+        if (colaborador != null) {
+            System.out.println(">>> LOGIN: Sucesso! Utilizador encontrado: " + colaborador.getNome());
+            
+            try {
+                FacesContext facesContext = FacesContext.getCurrentInstance();
+                
+                // 1. Guarda o colaborador autenticado na sessão HTTP
+                facesContext.getExternalContext().getSessionMap().put("colaboradorLogado", colaborador);
+                
+                // 2. Executa o redirecionamento HTTP explícito para a pasta /admin/agendamento.xhtml
+                String contextPath = facesContext.getExternalContext().getRequestContextPath();
+                facesContext.getExternalContext().redirect(contextPath + "/admin/agendamento.xhtml");
+                
+            } catch (Exception e) {
+                System.err.println(">>> ERRO ao redirecionar utilizador: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println(">>> LOGIN: Falha na validação para o utilizador: " + usuario);
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro", "Usuário ou senha inválidos!"));
         }
-        FacesContext.getCurrentInstance().addMessage(null, 
-            new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro", "Usuário ou senha inválidos!"));
-        return null;
     }
 
-    public String logout() {
-        FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
-        return "/login.xhtml?faces-redirect=true";
+    public String getUsuario() {
+        return usuario;
     }
 
-    public String getUsuario() { return usuario; }
-    public void setUsuario(String usuario) { this.usuario = usuario; }
-    public String getSenha() { return senha; }
-    public void setSenha(String senha) { this.senha = senha; }
-    public String getUsuarioLogado() { return usuarioLogado; }
-    public void setUsuarioLogado(String usuarioLogado) { this.usuarioLogado = usuarioLogado; }
+    public void setUsuario(String usuario) {
+        this.usuario = usuario;
+    }
+
+    public String getSenha() {
+        return senha;
+    }
+
+    public void setSenha(String senha) {
+        this.senha = senha;
+    }
 }

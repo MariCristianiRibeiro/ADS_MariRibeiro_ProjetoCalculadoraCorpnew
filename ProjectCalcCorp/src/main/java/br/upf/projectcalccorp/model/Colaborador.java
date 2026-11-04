@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package br.upf.projectcalccorp.model;
 
 import jakarta.persistence.*;
@@ -12,6 +8,8 @@ import java.util.Objects;
 @Entity
 @Table(name = "colaborador")
 public class Colaborador implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +27,9 @@ public class Colaborador implements Serializable {
     @Column(nullable = false, length = 50)
     private String cargo;
 
+    @Column(length = 100)
+    private String senha;
+
     @OneToMany(mappedBy = "solicitante", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<AgendamentoReuniao> agendamentos;
 
@@ -36,14 +37,22 @@ public class Colaborador implements Serializable {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
+
     public String getMatricula() { return matricula; }
     public void setMatricula(String matricula) { this.matricula = matricula; }
+
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
     public String getCargo() { return cargo; }
     public void setCargo(String cargo) { this.cargo = cargo; }
+
+    public String getSenha() { return senha; }
+    public void setSenha(String senha) { this.senha = senha; }
+
     public List<AgendamentoReuniao> getAgendamentos() { return agendamentos; }
     public void setAgendamentos(List<AgendamentoReuniao> agendamentos) { this.agendamentos = agendamentos; }
 

@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package br.upf.projectcalccorp.dao;
 
 import br.upf.projectcalccorp.model.SalaReuniao;
@@ -13,7 +9,7 @@ import java.util.List;
 @Stateless
 public class SalaReuniaoDAO extends GenericDAO<SalaReuniao> {
 
-    @PersistenceContext(unitName = "GestaoReunioesPU")
+    @PersistenceContext(unitName = "ProjectCalcCorp")
     private EntityManager em;
 
     public SalaReuniaoDAO() {
@@ -25,12 +21,14 @@ public class SalaReuniaoDAO extends GenericDAO<SalaReuniao> {
         return em;
     }
 
+    // ADICIONADO: Método de busca por nome exigido pelo SalaReuniaoBean
     public List<SalaReuniao> buscarPorNome(String nome) {
         if (nome == null || nome.trim().isEmpty()) {
             return findAll();
         }
-        return em.createQuery("SELECT s FROM SalaReuniao s WHERE LOWER(s.nome) LIKE :nome", SalaReuniao.class)
-                 .setParameter("nome", "%" + nome.toLowerCase() + "%")
-                 .getResultList();
+        return em.createQuery(
+            "SELECT s FROM SalaReuniao s WHERE LOWER(s.nome) LIKE LOWER(:nome)", SalaReuniao.class)
+            .setParameter("nome", "%" + nome.trim() + "%")
+            .getResultList();
     }
 }
