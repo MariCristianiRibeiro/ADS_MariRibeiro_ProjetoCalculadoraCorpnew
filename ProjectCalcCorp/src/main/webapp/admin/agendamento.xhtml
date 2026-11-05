@@ -7,42 +7,22 @@
 <h:head>
     <title>ProjectCalcCorp - Gestão de Agendamentos</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
-            margin: 0;
-            padding: 20px;
-        }
-        .header-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #007bff;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-        }
-        .nav-link {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            margin-right: 15px;
-        }
-        .nav-link:hover {
-            text-decoration: underline;
-        }
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; background-color: #007bff; color: white; padding: 12px 20px; border-radius: 6px; margin-bottom: 20px; }
+        .nav-link { color: white; text-decoration: none; font-weight: bold; margin-right: 15px; }
+        .nav-link:hover { text-decoration: underline; }
     </style>
 </h:head>
 <h:body>
 
-    <!-- Barra Superior / Menu de Navegação -->
+    <!-- Barra Superior / Navegação -->
     <div class="header-bar">
         <div>
             <h2 style="margin:0; display:inline-block; margin-right: 25px;">ProjectCalcCorp</h2>
             <h:outputLink value="agendamento.xhtml" styleClass="nav-link" style="text-decoration: underline;">Agendamentos</h:outputLink>
             <h:outputLink value="sala.xhtml" styleClass="nav-link">Salas</h:outputLink>
             <h:outputLink value="colaborador.xhtml" styleClass="nav-link">Colaboradores</h:outputLink>
+            <h:outputLink value="recurso.xhtml" styleClass="nav-link">Recursos</h:outputLink>
         </div>
         <h:panelGroup>
             <h:outputText value="Bem-vindo, #{usuarioLogado.nome}!" style="font-weight: bold; margin-right: 15px;" />
@@ -52,7 +32,7 @@
         </h:panelGroup>
     </div>
 
-    <!-- Conteúdo Principal -->
+    <!-- Tabela Principal -->
     <h:form id="formAgendamento">
         <p:growl id="messages" showDetail="true" />
 
@@ -71,7 +51,6 @@
                 </p:toolbarGroup>
             </p:toolbar>
 
-            <!-- Tabela Conectada à Base de Dados PostgreSQL -->
             <p:dataTable id="dtAgendamentos" var="a" value="#{agendamentoBean.agendamentos}" 
                          emptyMessage="Nenhum agendamento encontrado no banco de dados." 
                          paginator="true" rows="10">
@@ -88,8 +67,12 @@
                     <h:outputText value="#{a.sala.nome} (Andar #{a.sala.andar})" />
                 </p:column>
 
-                <p:column headerText="Participantes" style="text-align: center;">
+                <p:column headerText="Participantes" style="text-align: center; width: 120px;">
                     <h:outputText value="#{a.participantes.size()} presente(s)" />
+                </p:column>
+
+                <p:column headerText="Recursos" style="text-align: center; width: 120px;">
+                    <h:outputText value="#{a.recursos.size()} item(ns)" />
                 </p:column>
 
                 <p:column headerText="Início">
@@ -119,7 +102,7 @@
         </p:panel>
     </h:form>
 
-    <!-- Modal para Criar Novo Agendamento -->
+    <!-- Modal Novo Agendamento -->
     <p:dialog header="Calculadora de Custo de Reunião" widgetVar="dlgNovo" modal="true" resizable="false" width="550">
         <h:form id="formNovoDialog">
             <h:panelGrid id="pgNovo" columns="2" cellpadding="5" style="width:100%;">
@@ -139,6 +122,13 @@
                                    itemLabel="#{c.nome} (#{c.cargo} - R$ #{c.valorHora}/h)" itemValue="#{c.id}" />
                     <p:ajax listener="#{agendamentoBean.calcularCustoTotal}" update="txtCusto pnlAlerta" />
                     <p:ajax event="toggleSelect" listener="#{agendamentoBean.calcularCustoTotal}" update="txtCusto pnlAlerta" />
+                </p:selectCheckboxMenu>
+
+                <p:outputLabel for="recursos" value="Recursos Tecnológicos:" />
+                <p:selectCheckboxMenu id="recursos" value="#{agendamentoBean.idsRecursosSelecionados}" 
+                                      label="Selecione os Recursos" style="width:100%;" filter="true" filterMatchMode="startsWith">
+                    <f:selectItems value="#{agendamentoBean.recursosDisponiveis}" var="r" 
+                                   itemLabel="#{r.nome}" itemValue="#{r.id}" />
                 </p:selectCheckboxMenu>
 
                 <p:outputLabel for="dataInicio" value="Data e Hora Início:" />
@@ -163,7 +153,7 @@
 
             </h:panelGrid>
 
-            <!-- Banner Alerta: Poderia ser um e-mail? -->
+            <!-- Banner Alerta -->
             <h:panelGroup id="pnlAlerta" layout="block" style="margin-top: 15px;">
                 <h:panelGroup rendered="#{agendamentoBean.alertaEmail}" layout="block" 
                               style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 12px; border-radius: 6px; text-align: center;">

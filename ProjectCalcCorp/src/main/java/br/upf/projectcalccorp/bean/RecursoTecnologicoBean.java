@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package br.upf.projectcalccorp.bean;
 
 import br.upf.projectcalccorp.dao.RecursoTecnologicoDAO;
@@ -16,11 +12,14 @@ import jakarta.faces.convert.Converter;
 import jakarta.faces.convert.FacesConverter;
 import jakarta.inject.Named;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Named("recursoTecnologicoBean")
 @SessionScoped
 public class RecursoTecnologicoBean implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @EJB
     private RecursoTecnologicoDAO dao;
@@ -31,52 +30,85 @@ public class RecursoTecnologicoBean implements Serializable {
 
     @PostConstruct
     public void init() {
-        entidade = new RecursoTecnologico();
+        novo();
         carregarLista();
     }
 
     public void carregarLista() {
-        lista = dao.findAll();
+        try {
+            lista = (dao != null) ? dao.findAll() : new ArrayList<>();
+        } catch (Exception e) {
+            lista = new ArrayList<>();
+            System.err.println(">>> Erro ao carregar recursos: " + e.getMessage());
+        }
     }
 
     public void pesquisar() {
-        lista = dao.buscarPorNome(termoBusca);
+        if (termoBusca != null && !termoBusca.trim().isEmpty()) {
+            lista = dao.buscarPorNome(termoBusca);
+        } else {
+            carregarLista();
+        }
     }
 
     public void novo() {
         entidade = new RecursoTecnologico();
     }
 
+    public void prepararEdicao(RecursoTecnologico item) {
+        this.entidade = item;
+    }
+
     public void salvar() {
-        if (entidade.getId() == null) {
-            dao.create(entidade);
-        } else {
-            dao.edit(entidade);
+        FacesContext context = FacesContext.getCurrentInstance();
+        try {
+            if (entidade.getId() == null) {
+                dao.create(entidade);
+                context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Sucesso", "Recurso salvo com sucesso!"));
+            } else {
+                dao.edit(entidade);
+                context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Sucesso", "Recurso atualizado com sucesso!"));
+            }
+            novo();
+            carregarLista();
+        } catch (Exception e) {
+            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro ao salvar", e.getMessage()));
         }
-        entidade = new RecursoTecnologico();
-        carregarLista();
-        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Recurso salvo com sucesso!"));
     }
 
     public void excluir(RecursoTecnologico item) {
-        dao.remove(item);
-        carregarLista();
-        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Recurso removido!"));
+        FacesContext context = FacesContext.getCurrentInstance();
+        try {
+            dao.remove(item);
+            carregarLista();
+            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Sucesso", "Recurso removido com sucesso!"));
+        } catch (Exception e) {
+            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro", "Não é possível remover recursos associados a reuniões registradas."));
+        }
     }
 
+    // Getters e Setters
     public RecursoTecnologico getEntidade() { return entidade; }
     public void setEntidade(RecursoTecnologico entidade) { this.entidade = entidade; }
+
     public List<RecursoTecnologico> getLista() { return lista; }
+    public void setLista(List<RecursoTecnologico> lista) { this.lista = lista; }
+
     public String getTermoBusca() { return termoBusca; }
     public void setTermoBusca(String termoBusca) { this.termoBusca = termoBusca; }
 
+    // Conversor JSF
     @FacesConverter(forClass = RecursoTecnologico.class)
     public static class RecursoConverter implements Converter {
         @Override
         public Object getAsObject(FacesContext context, UIComponent component, String value) {
             if (value == null || value.trim().isEmpty()) return null;
-            RecursoTecnologicoBean bean = context.getApplication().evaluateExpressionGet(context, "#{recursoTecnologicoBean}", RecursoTecnologicoBean.class);
-            return bean.dao.find(Long.valueOf(value));
+            try {
+                RecursoTecnologicoBean bean = context.getApplication().evaluateExpressionGet(context, "#{recursoTecnologicoBean}", RecursoTecnologicoBean.class);
+                return bean.dao.find(Long.valueOf(value));
+            } catch (Exception e) {
+                return null;
+            }
         }
 
         @Override

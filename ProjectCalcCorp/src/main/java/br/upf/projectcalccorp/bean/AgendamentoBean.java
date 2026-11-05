@@ -51,6 +51,7 @@ public class AgendamentoBean implements Serializable {
     private AgendamentoReuniao novoAgendamento;
     private Long idSalaSelecionada;
     private List<Long> idsParticipantesSelecionados;
+    private List<Long> idsRecursosSelecionados;
     private boolean alertaEmail;
 
     public AgendamentoBean() {
@@ -86,6 +87,7 @@ public class AgendamentoBean implements Serializable {
         novoAgendamento.setCustoTotal(BigDecimal.ZERO);
         idSalaSelecionada = null;
         idsParticipantesSelecionados = new ArrayList<>();
+        idsRecursosSelecionados = new ArrayList<>();
         alertaEmail = false;
     }
 
@@ -93,7 +95,6 @@ public class AgendamentoBean implements Serializable {
         BigDecimal custoHoraSala = BigDecimal.ZERO;
         BigDecimal custoHoraParticipantes = BigDecimal.ZERO;
 
-        // Custo/Hora da Sala
         if (idSalaSelecionada != null && salaReuniaoDAO != null) {
             SalaReuniao sala = salaReuniaoDAO.find(idSalaSelecionada);
             if (sala != null && sala.getValorHora() != null) {
@@ -101,7 +102,6 @@ public class AgendamentoBean implements Serializable {
             }
         }
 
-        // Custo/Hora dos Participantes Selecionados
         if (idsParticipantesSelecionados != null && !idsParticipantesSelecionados.isEmpty() && colaboradorDAO != null) {
             for (Long idColab : idsParticipantesSelecionados) {
                 Colaborador c = colaboradorDAO.find(idColab);
@@ -111,7 +111,6 @@ public class AgendamentoBean implements Serializable {
             }
         }
 
-        // Cálculo Total: (Custo Sala + Custo Participantes) * Duração em Horas
         if (novoAgendamento.getDuracaoHoras() != null) {
             BigDecimal duracao = BigDecimal.valueOf(novoAgendamento.getDuracaoHoras());
             BigDecimal custoHoraTotal = custoHoraSala.add(custoHoraParticipantes);
@@ -119,7 +118,6 @@ public class AgendamentoBean implements Serializable {
             BigDecimal total = custoHoraTotal.multiply(duracao);
             novoAgendamento.setCustoTotal(total);
 
-            // Alerta "Poderia ser um e-mail?" se o valor ultrapassar R$ 500,00
             alertaEmail = total.compareTo(new BigDecimal("500.00")) > 0;
         }
     }
@@ -144,7 +142,7 @@ public class AgendamentoBean implements Serializable {
             novoAgendamento.setSala(sala);
             novoAgendamento.setSolicitante(usuarioLogado);
 
-            // Mapeia a lista de participantes selecionados
+            // Mapeia os participantes selecionados
             List<Colaborador> participantes = new ArrayList<>();
             if (idsParticipantesSelecionados != null && colaboradorDAO != null) {
                 for (Long idColab : idsParticipantesSelecionados) {
@@ -156,7 +154,18 @@ public class AgendamentoBean implements Serializable {
             }
             novoAgendamento.setParticipantes(participantes);
 
-            // Calcula a data e hora de término com base nas horas informadas
+            // Mapeia os recursos selecionados
+            List<RecursoTecnologico> recursos = new ArrayList<>();
+            if (idsRecursosSelecionados != null && recursoTecnologicoDAO != null) {
+                for (Long idRec : idsRecursosSelecionados) {
+                    RecursoTecnologico r = recursoTecnologicoDAO.find(idRec);
+                    if (r != null) {
+                        recursos.add(r);
+                    }
+                }
+            }
+            novoAgendamento.setRecursos(recursos);
+
             long inicioMs = novoAgendamento.getDataHoraInicio().getTime();
             long duracaoMs = (long) (novoAgendamento.getDuracaoHoras() * 3600000);
             novoAgendamento.setDataHoraFim(new Date(inicioMs + duracaoMs));
@@ -194,6 +203,9 @@ public class AgendamentoBean implements Serializable {
 
     public List<Long> getIdsParticipantesSelecionados() { return idsParticipantesSelecionados; }
     public void setIdsParticipantesSelecionados(List<Long> idsParticipantesSelecionados) { this.idsParticipantesSelecionados = idsParticipantesSelecionados; }
+
+    public List<Long> getIdsRecursosSelecionados() { return idsRecursosSelecionados; }
+    public void setIdsRecursosSelecionados(List<Long> idsRecursosSelecionados) { this.idsRecursosSelecionados = idsRecursosSelecionados; }
 
     public boolean isAlertaEmail() { return alertaEmail; }
     public void setAlertaEmail(boolean alertaEmail) { this.alertaEmail = alertaEmail; }
