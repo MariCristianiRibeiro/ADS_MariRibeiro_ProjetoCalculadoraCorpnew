@@ -1,6 +1,7 @@
 package br.upf.projectcalccorp.bean;
 
 import br.upf.projectcalccorp.dao.AgendamentoReuniaoDAO;
+import br.upf.projectcalccorp.dao.ColaboradorDAO;
 import br.upf.projectcalccorp.dao.RecursoTecnologicoDAO;
 import br.upf.projectcalccorp.dao.SalaReuniaoDAO;
 import br.upf.projectcalccorp.model.AgendamentoReuniao;
@@ -39,12 +40,18 @@ public class AgendamentoBean implements Serializable {
     @EJB
     private RecursoTecnologicoDAO recursoTecnologicoDAO;
 
+    @EJB
+    private ColaboradorDAO colaboradorDAO;
+
     private List<AgendamentoReuniao> agendamentos;
     private List<SalaReuniao> salas;
     private List<RecursoTecnologico> recursosDisponiveis;
+    private List<Colaborador> colaboradoresDisponiveis;
 
     private AgendamentoReuniao novoAgendamento;
     private Long idSalaSelecionada;
+    private List<Long> idsParticipantesSelecionados;
+    private boolean alertaEmail;
 
     public AgendamentoBean() {
     }
@@ -60,11 +67,13 @@ public class AgendamentoBean implements Serializable {
             agendamentos = (agendamentoReuniaoDAO != null) ? agendamentoReuniaoDAO.findAll() : new ArrayList<>();
             salas = (salaReuniaoDAO != null) ? salaReuniaoDAO.findAll() : new ArrayList<>();
             recursosDisponiveis = (recursoTecnologicoDAO != null) ? recursoTecnologicoDAO.findAll() : new ArrayList<>();
+            colaboradoresDisponiveis = (colaboradorDAO != null) ? colaboradorDAO.findAll() : new ArrayList<>();
         } catch (Exception e) {
             System.err.println(">>> Erro ao carregar dados do banco: " + e.getMessage());
             agendamentos = new ArrayList<>();
             salas = new ArrayList<>();
             recursosDisponiveis = new ArrayList<>();
+            colaboradoresDisponiveis = new ArrayList<>();
         }
     }
 
@@ -76,15 +85,42 @@ public class AgendamentoBean implements Serializable {
         novoAgendamento.setDuracaoHoras(1.0);
         novoAgendamento.setCustoTotal(BigDecimal.ZERO);
         idSalaSelecionada = null;
+        idsParticipantesSelecionados = new ArrayList<>();
+        alertaEmail = false;
     }
 
     public void calcularCustoTotal() {
-        if (idSalaSelecionada != null && novoAgendamento.getDuracaoHoras() != null && salaReuniaoDAO != null) {
+        BigDecimal custoHoraSala = BigDecimal.ZERO;
+        BigDecimal custoHoraParticipantes = BigDecimal.ZERO;
+
+        // Custo/Hora da Sala
+        if (idSalaSelecionada != null && salaReuniaoDAO != null) {
             SalaReuniao sala = salaReuniaoDAO.find(idSalaSelecionada);
             if (sala != null && sala.getValorHora() != null) {
-                BigDecimal duracao = BigDecimal.valueOf(novoAgendamento.getDuracaoHoras());
-                novoAgendamento.setCustoTotal(sala.getValorHora().multiply(duracao));
+                custoHoraSala = sala.getValorHora();
             }
+        }
+
+        // Custo/Hora dos Participantes Selecionados
+        if (idsParticipantesSelecionados != null && !idsParticipantesSelecionados.isEmpty() && colaboradorDAO != null) {
+            for (Long idColab : idsParticipantesSelecionados) {
+                Colaborador c = colaboradorDAO.find(idColab);
+                if (c != null && c.getValorHora() != null) {
+                    custoHoraParticipantes = custoHoraParticipantes.add(c.getValorHora());
+                }
+            }
+        }
+
+        // Cálculo Total: (Custo Sala + Custo Participantes) * Duração em Horas
+        if (novoAgendamento.getDuracaoHoras() != null) {
+            BigDecimal duracao = BigDecimal.valueOf(novoAgendamento.getDuracaoHoras());
+            BigDecimal custoHoraTotal = custoHoraSala.add(custoHoraParticipantes);
+
+            BigDecimal total = custoHoraTotal.multiply(duracao);
+            novoAgendamento.setCustoTotal(total);
+
+            // Alerta "Poderia ser um e-mail?" se o valor ultrapassar R$ 500,00
+            alertaEmail = total.compareTo(new BigDecimal("500.00")) > 0;
         }
     }
 
@@ -107,6 +143,18 @@ public class AgendamentoBean implements Serializable {
             SalaReuniao sala = salaReuniaoDAO.find(idSalaSelecionada);
             novoAgendamento.setSala(sala);
             novoAgendamento.setSolicitante(usuarioLogado);
+
+            // Mapeia a lista de participantes selecionados
+            List<Colaborador> participantes = new ArrayList<>();
+            if (idsParticipantesSelecionados != null && colaboradorDAO != null) {
+                for (Long idColab : idsParticipantesSelecionados) {
+                    Colaborador c = colaboradorDAO.find(idColab);
+                    if (c != null) {
+                        participantes.add(c);
+                    }
+                }
+            }
+            novoAgendamento.setParticipantes(participantes);
 
             // Calcula a data e hora de término com base nas horas informadas
             long inicioMs = novoAgendamento.getDataHoraInicio().getTime();
@@ -135,11 +183,20 @@ public class AgendamentoBean implements Serializable {
     public List<RecursoTecnologico> getRecursosDisponiveis() { return recursosDisponiveis; }
     public void setRecursosDisponiveis(List<RecursoTecnologico> recursosDisponiveis) { this.recursosDisponiveis = recursosDisponiveis; }
 
+    public List<Colaborador> getColaboradoresDisponiveis() { return colaboradoresDisponiveis; }
+    public void setColaboradoresDisponiveis(List<Colaborador> colaboradoresDisponiveis) { this.colaboradoresDisponiveis = colaboradoresDisponiveis; }
+
     public AgendamentoReuniao getNovoAgendamento() { return novoAgendamento; }
     public void setNovoAgendamento(AgendamentoReuniao novoAgendamento) { this.novoAgendamento = novoAgendamento; }
 
     public Long getIdSalaSelecionada() { return idSalaSelecionada; }
     public void setIdSalaSelecionada(Long idSalaSelecionada) { this.idSalaSelecionada = idSalaSelecionada; }
+
+    public List<Long> getIdsParticipantesSelecionados() { return idsParticipantesSelecionados; }
+    public void setIdsParticipantesSelecionados(List<Long> idsParticipantesSelecionados) { this.idsParticipantesSelecionados = idsParticipantesSelecionados; }
+
+    public boolean isAlertaEmail() { return alertaEmail; }
+    public void setAlertaEmail(boolean alertaEmail) { this.alertaEmail = alertaEmail; }
 
     public StatusAgendamento[] getStatusAgendamentoValues() { return StatusAgendamento.values(); }
     public TipoReuniao[] getTiposReuniao() { return TipoReuniao.values(); }

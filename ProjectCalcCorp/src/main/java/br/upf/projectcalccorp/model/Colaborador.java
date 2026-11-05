@@ -2,6 +2,7 @@ package br.upf.projectcalccorp.model;
 
 import jakarta.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,6 +31,9 @@ public class Colaborador implements Serializable {
     @Column(length = 100)
     private String senha;
 
+    @Column(name = "valor_hora", precision = 10, scale = 2)
+    private BigDecimal valorHora;
+
     @OneToMany(mappedBy = "solicitante", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<AgendamentoReuniao> agendamentos;
 
@@ -52,6 +56,9 @@ public class Colaborador implements Serializable {
 
     public String getSenha() { return senha; }
     public void setSenha(String senha) { this.senha = senha; }
+
+    public BigDecimal getValorHora() { return valorHora; }
+    public void setValorHora(BigDecimal valorHora) { this.valorHora = valorHora; }
 
     public List<AgendamentoReuniao> getAgendamentos() { return agendamentos; }
     public void setAgendamentos(List<AgendamentoReuniao> agendamentos) { this.agendamentos = agendamentos; }

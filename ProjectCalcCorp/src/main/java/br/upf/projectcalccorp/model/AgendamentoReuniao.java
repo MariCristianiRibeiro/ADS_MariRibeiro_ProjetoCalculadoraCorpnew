@@ -3,6 +3,7 @@ package br.upf.projectcalccorp.model;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -53,39 +54,50 @@ public class AgendamentoReuniao implements Serializable {
         joinColumns = @JoinColumn(name = "agendamento_id"),
         inverseJoinColumns = @JoinColumn(name = "recurso_id")
     )
-    private List<RecursoTecnologico> recursos;
+    private List<RecursoTecnologico> recursos = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "agendamento_participante",
+        joinColumns = @JoinColumn(name = "agendamento_id"),
+        inverseJoinColumns = @JoinColumn(name = "colaborador_id")
+    )
+    private List<Colaborador> participantes = new ArrayList<>();
 
     public AgendamentoReuniao() {}
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    
+
     public Colaborador getSolicitante() { return solicitante; }
     public void setSolicitante(Colaborador solicitante) { this.solicitante = solicitante; }
-    
+
     public SalaReuniao getSala() { return sala; }
     public void setSala(SalaReuniao sala) { this.sala = sala; }
-    
+
     public Date getDataHoraInicio() { return dataHoraInicio; }
     public void setDataHoraInicio(Date dataHoraInicio) { this.dataHoraInicio = dataHoraInicio; }
-    
+
     public Date getDataHoraFim() { return dataHoraFim; }
     public void setDataHoraFim(Date dataHoraFim) { this.dataHoraFim = dataHoraFim; }
-    
+
     public Double getDuracaoHoras() { return duracaoHoras; }
     public void setDuracaoHoras(Double duracaoHoras) { this.duracaoHoras = duracaoHoras; }
-    
+
     public BigDecimal getCustoTotal() { return custoTotal; }
     public void setCustoTotal(BigDecimal custoTotal) { this.custoTotal = custoTotal; }
-    
+
     public StatusAgendamento getStatus() { return status; }
     public void setStatus(StatusAgendamento status) { this.status = status; }
-    
+
     public TipoReuniao getTipo() { return tipo; }
     public void setTipo(TipoReuniao tipo) { this.tipo = tipo; }
-    
+
     public List<RecursoTecnologico> getRecursos() { return recursos; }
     public void setRecursos(List<RecursoTecnologico> recursos) { this.recursos = recursos; }
+
+    public List<Colaborador> getParticipantes() { return participantes; }
+    public void setParticipantes(List<Colaborador> participantes) { this.participantes = participantes; }
 
     @Override
     public boolean equals(Object o) {
