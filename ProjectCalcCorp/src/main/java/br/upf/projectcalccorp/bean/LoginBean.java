@@ -8,6 +8,7 @@ import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
 import java.io.Serializable;
+import java.util.Map;
 
 @Named("loginBean")
 @RequestScoped
@@ -34,11 +35,16 @@ public class LoginBean implements Serializable {
             
             try {
                 FacesContext facesContext = FacesContext.getCurrentInstance();
+                Map<String, Object> sessionMap = facesContext.getExternalContext().getSessionMap();
                 
-                // 1. Guarda o colaborador autenticado na sessão HTTP
-                facesContext.getExternalContext().getSessionMap().put("colaboradorLogado", colaborador);
+                // Grava o colaborador em todas as chaves de sessão comuns utilizadas por filtros
+                sessionMap.put("colaboradorLogado", colaborador);
+                sessionMap.put("usuarioLogado", colaborador);
+                sessionMap.put("usuario", colaborador);
+                sessionMap.put("colaborador", colaborador);
+                sessionMap.put("user", colaborador);
                 
-                // 2. Executa o redirecionamento HTTP explícito para a pasta /admin/agendamento.xhtml
+                // Força o redirecionamento HTTP direto para a pasta /admin/agendamento.xhtml
                 String contextPath = facesContext.getExternalContext().getRequestContextPath();
                 facesContext.getExternalContext().redirect(contextPath + "/admin/agendamento.xhtml");
                 

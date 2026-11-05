@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package br.upf.projectcalccorp.model;
 
 import jakarta.persistence.*;
@@ -14,6 +10,8 @@ import java.util.Objects;
 @Entity
 @Table(name = "agendamento_reuniao")
 public class AgendamentoReuniao implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,11 +40,11 @@ public class AgendamentoReuniao implements Serializable {
     private BigDecimal custoTotal;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "status", nullable = false)
     private StatusAgendamento status;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "tipo", nullable = false)
     private TipoReuniao tipo;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -61,22 +59,31 @@ public class AgendamentoReuniao implements Serializable {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+    
     public Colaborador getSolicitante() { return solicitante; }
     public void setSolicitante(Colaborador solicitante) { this.solicitante = solicitante; }
+    
     public SalaReuniao getSala() { return sala; }
     public void setSala(SalaReuniao sala) { this.sala = sala; }
+    
     public Date getDataHoraInicio() { return dataHoraInicio; }
     public void setDataHoraInicio(Date dataHoraInicio) { this.dataHoraInicio = dataHoraInicio; }
+    
     public Date getDataHoraFim() { return dataHoraFim; }
     public void setDataHoraFim(Date dataHoraFim) { this.dataHoraFim = dataHoraFim; }
+    
     public Double getDuracaoHoras() { return duracaoHoras; }
     public void setDuracaoHoras(Double duracaoHoras) { this.duracaoHoras = duracaoHoras; }
+    
     public BigDecimal getCustoTotal() { return custoTotal; }
     public void setCustoTotal(BigDecimal custoTotal) { this.custoTotal = custoTotal; }
+    
     public StatusAgendamento getStatus() { return status; }
     public void setStatus(StatusAgendamento status) { this.status = status; }
+    
     public TipoReuniao getTipo() { return tipo; }
     public void setTipo(TipoReuniao tipo) { this.tipo = tipo; }
+    
     public List<RecursoTecnologico> getRecursos() { return recursos; }
     public void setRecursos(List<RecursoTecnologico> recursos) { this.recursos = recursos; }
 

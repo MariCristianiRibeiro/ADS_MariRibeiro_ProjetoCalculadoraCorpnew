@@ -21,7 +21,10 @@
                 <p:outputLabel for="pwd" value="Senha:" />
                 <p:password id="pwd" value="#{loginBean.senha}" required="true" requiredMessage="Digite a senha." style="width:100%; margin-bottom: 10px;"/>
 
-                <p:commandButton value="Entrar" action="#{loginBean.autenticar}" update="@form" style="width:100%; margin-top:10px;"/>
+                <p:commandButton value="Entrar" 
+                                 action="#{loginBean.autenticar}" 
+                                 ajax="false" 
+                                 style="width:100%; margin-top:10px;"/>
             </h:panelGrid>
         </p:panel>
     </h:form>
