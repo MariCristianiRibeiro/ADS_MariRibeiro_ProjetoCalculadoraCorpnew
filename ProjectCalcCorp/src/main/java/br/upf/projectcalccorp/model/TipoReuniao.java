@@ -1,10 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Enum.java to edit this template
- */
 package br.upf.projectcalccorp.model;
 
 public enum TipoReuniao {
+    INTERNA("Interna"),
+    CLIENTE("Cliente"),
     PRESENCIAL("Presencial"),
     REMOTO("Remoto"),
     HIBRIDO("Híbrido");
