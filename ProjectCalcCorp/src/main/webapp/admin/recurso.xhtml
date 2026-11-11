@@ -15,7 +15,7 @@
 </h:head>
 <h:body>
 
-    <!-- Barra de Navegação -->
+    <!-- Barra Superior / Navegação Completa -->
     <div class="header-bar">
         <div>
             <h2 style="margin:0; display:inline-block; margin-right: 25px;">ProjectCalcCorp</h2>
@@ -24,19 +24,19 @@
             <h:outputLink value="colaborador.xhtml" styleClass="nav-link">Colaboradores</h:outputLink>
             <h:outputLink value="recurso.xhtml" styleClass="nav-link" style="text-decoration: underline;">Recursos</h:outputLink>
         </div>
-        <div>
+        <h:panelGroup>
             <h:outputText value="Bem-vindo, #{usuarioLogado.nome}!" style="font-weight: bold; margin-right: 15px;" />
             <h:form style="display:inline;">
                 <p:commandButton value="Sair" action="#{loginBean.autenticar}" ajax="false" styleClass="ui-button-danger ui-button-flat" />
             </h:form>
-        </div>
+        </h:panelGroup>
     </div>
 
     <!-- Tabela Principal de Recursos -->
     <h:form id="formRecurso">
         <p:growl id="messages" showDetail="true" />
 
-        <p:panel header="Gestão de Recursos Tecnológicos">
+        <p:panel header="Gestão de Recursos Tecnológicos das Salas">
             <p:toolbar style="margin-bottom: 15px;">
                 <p:toolbarGroup>
                     <p:commandButton value="Novo Recurso" icon="pi pi-plus" 
@@ -58,12 +58,9 @@
                     <h:outputText value="#{r.id}" />
                 </p:column>
 
-                <p:column headerText="Nome do Recurso" style="width: 250px;">
+                <p:column headerText="Nome do Recurso / Equipamento">
+                    <i class="pi pi-desktop" style="margin-right: 8px; color: #007bff;"></i>
                     <h:outputText value="#{r.nome}" style="font-weight: bold;" />
-                </p:column>
-
-                <p:column headerText="Descrição">
-                    <h:outputText value="#{r.descricao}" />
                 </p:column>
 
                 <p:column headerText="Ações" style="width: 120px; text-align: center;">
@@ -97,9 +94,6 @@
 
                 <p:outputLabel for="nome" value="Nome do Recurso:" />
                 <p:inputText id="nome" value="#{recursoTecnologicoBean.entidade.nome}" required="true" style="width:100%;" />
-
-                <p:outputLabel for="descricao" value="Descrição:" />
-                <p:inputTextarea id="descricao" value="#{recursoTecnologicoBean.entidade.descricao}" rows="3" style="width:100%;" />
 
             </h:panelGrid>
 

@@ -4,19 +4,19 @@ import br.upf.projectcalccorp.dao.RecursoTecnologicoDAO;
 import br.upf.projectcalccorp.model.RecursoTecnologico;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
-import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.convert.Converter;
 import jakarta.faces.convert.FacesConverter;
+import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Named("recursoTecnologicoBean")
-@SessionScoped
+@ViewScoped
 public class RecursoTecnologicoBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -27,6 +27,9 @@ public class RecursoTecnologicoBean implements Serializable {
     private RecursoTecnologico entidade;
     private List<RecursoTecnologico> lista;
     private String termoBusca;
+
+    public RecursoTecnologicoBean() {
+    }
 
     @PostConstruct
     public void init() {
@@ -44,9 +47,13 @@ public class RecursoTecnologicoBean implements Serializable {
     }
 
     public void pesquisar() {
-        if (termoBusca != null && !termoBusca.trim().isEmpty()) {
-            lista = dao.buscarPorNome(termoBusca);
-        } else {
+        try {
+            if (termoBusca != null && !termoBusca.trim().isEmpty()) {
+                lista = dao.buscarPorNome(termoBusca);
+            } else {
+                carregarLista();
+            }
+        } catch (Exception e) {
             carregarLista();
         }
     }
@@ -87,6 +94,11 @@ public class RecursoTecnologicoBean implements Serializable {
         }
     }
 
+    // Propriedade acedida pela tela recurso.xhtml
+    public int getTotalRecursos() {
+        return lista != null ? lista.size() : 0;
+    }
+
     // Getters e Setters
     public RecursoTecnologico getEntidade() { return entidade; }
     public void setEntidade(RecursoTecnologico entidade) { this.entidade = entidade; }
@@ -97,7 +109,7 @@ public class RecursoTecnologicoBean implements Serializable {
     public String getTermoBusca() { return termoBusca; }
     public void setTermoBusca(String termoBusca) { this.termoBusca = termoBusca; }
 
-    // Conversor JSF
+    // Conversor JSF Integrado
     @FacesConverter(forClass = RecursoTecnologico.class)
     public static class RecursoConverter implements Converter {
         @Override

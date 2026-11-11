@@ -13,9 +13,9 @@ import br.upf.projectcalccorp.model.TipoReuniao;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
-import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
+import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpSession;
 
@@ -26,7 +26,7 @@ import java.util.Date;
 import java.util.List;
 
 @Named("agendamentoBean")
-@RequestScoped
+@ViewScoped
 public class AgendamentoBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -111,7 +111,7 @@ public class AgendamentoBean implements Serializable {
             }
         }
 
-        if (novoAgendamento.getDuracaoHoras() != null) {
+        if (novoAgendamento != null && novoAgendamento.getDuracaoHoras() != null) {
             BigDecimal duracao = BigDecimal.valueOf(novoAgendamento.getDuracaoHoras());
             BigDecimal custoHoraTotal = custoHoraSala.add(custoHoraParticipantes);
 
@@ -142,7 +142,6 @@ public class AgendamentoBean implements Serializable {
             novoAgendamento.setSala(sala);
             novoAgendamento.setSolicitante(usuarioLogado);
 
-            // Mapeia os participantes selecionados
             List<Colaborador> participantes = new ArrayList<>();
             if (idsParticipantesSelecionados != null && colaboradorDAO != null) {
                 for (Long idColab : idsParticipantesSelecionados) {
@@ -154,7 +153,6 @@ public class AgendamentoBean implements Serializable {
             }
             novoAgendamento.setParticipantes(participantes);
 
-            // Mapeia os recursos selecionados
             List<RecursoTecnologico> recursos = new ArrayList<>();
             if (idsRecursosSelecionados != null && recursoTecnologicoDAO != null) {
                 for (Long idRec : idsRecursosSelecionados) {
