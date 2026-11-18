@@ -22,12 +22,16 @@ public class RecursoTecnologico implements Serializable {
     @Column(name = "nome", nullable = false, length = 100)
     private String nome;
 
+    @Column(name = "categoria", nullable = false, length = 100)
+    private String categoria;
+
     public RecursoTecnologico() {
     }
 
-    public RecursoTecnologico(Long id, String nome) {
+    public RecursoTecnologico(Long id, String nome, String categoria) {
         this.id = id;
         this.nome = nome;
+        this.categoria = categoria;
     }
 
     public Long getId() {
@@ -44,6 +48,14 @@ public class RecursoTecnologico implements Serializable {
 
     public void setNome(String nome) {
         this.nome = nome;
+    }
+
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
     }
 
     @Override

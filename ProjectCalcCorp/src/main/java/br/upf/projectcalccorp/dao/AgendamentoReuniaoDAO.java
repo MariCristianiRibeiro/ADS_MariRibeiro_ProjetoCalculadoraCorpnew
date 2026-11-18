@@ -8,7 +8,6 @@ import jakarta.persistence.PersistenceContext;
 @Stateless
 public class AgendamentoReuniaoDAO extends GenericDAO<AgendamentoReuniao> {
 
-    // CORREÇÃO: unitName aponta exatamente para "ProjectCalcCorp" do persistence.xml
     @PersistenceContext(unitName = "ProjectCalcCorp")
     private EntityManager em;
 
@@ -19,5 +18,19 @@ public class AgendamentoReuniaoDAO extends GenericDAO<AgendamentoReuniao> {
     @Override
     protected EntityManager getEntityManager() {
         return em;
+    }
+
+    @Override
+    public AgendamentoReuniao find(Object id) {
+        AgendamentoReuniao agendamento = super.find(id);
+        if (agendamento != null) {
+            if (agendamento.getRecursos() != null) {
+                agendamento.getRecursos().size();
+            }
+            if (agendamento.getParticipantes() != null) {
+                agendamento.getParticipantes().size();
+            }
+        }
+        return agendamento;
     }
 }

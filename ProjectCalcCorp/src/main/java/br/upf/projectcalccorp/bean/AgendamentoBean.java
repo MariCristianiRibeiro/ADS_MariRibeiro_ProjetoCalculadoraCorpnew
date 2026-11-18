@@ -91,6 +91,67 @@ public class AgendamentoBean implements Serializable {
         alertaEmail = false;
     }
 
+    public void prepararEdicao(AgendamentoReuniao agendamento) {
+        AgendamentoReuniao gerenciado = (agendamentoReuniaoDAO != null && agendamento.getId() != null)
+                ? agendamentoReuniaoDAO.find(agendamento.getId())
+                : null;
+        this.novoAgendamento = (gerenciado != null) ? gerenciado : agendamento;
+
+        this.idSalaSelecionada = (this.novoAgendamento.getSala() != null)
+                ? this.novoAgendamento.getSala().getId()
+                : null;
+
+        this.idsParticipantesSelecionados = new ArrayList<>();
+        try {
+            if (this.novoAgendamento.getParticipantes() != null) {
+                for (Colaborador c : this.novoAgendamento.getParticipantes()) {
+                    if (c != null && c.getId() != null) {
+                        this.idsParticipantesSelecionados.add(c.getId());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println(">>> Aviso ao carregar participantes para edição: " + e.getMessage());
+        }
+
+        this.idsRecursosSelecionados = new ArrayList<>();
+        try {
+            if (this.novoAgendamento.getRecursos() != null) {
+                for (RecursoTecnologico r : this.novoAgendamento.getRecursos()) {
+                    if (r != null && r.getId() != null) {
+                        this.idsRecursosSelecionados.add(r.getId());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println(">>> Aviso ao carregar recursos para edição: " + e.getMessage());
+        }
+
+        calcularCustoTotal();
+    }
+
+    public void cancelar(AgendamentoReuniao agendamento) {
+        FacesContext context = FacesContext.getCurrentInstance();
+        try {
+            AgendamentoReuniao alvo = (agendamentoReuniaoDAO != null && agendamento.getId() != null)
+                    ? agendamentoReuniaoDAO.find(agendamento.getId())
+                    : agendamento;
+
+            if (alvo.getStatus() == StatusAgendamento.CANCELADO) {
+                context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, "Aviso", "Este agendamento já está cancelado."));
+                return;
+            }
+
+            alvo.setStatus(StatusAgendamento.CANCELADO);
+            agendamentoReuniaoDAO.edit(alvo);
+            carregarDados();
+
+            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Cancelado", "Agendamento cancelado com sucesso!"));
+        } catch (Exception e) {
+            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro", "Falha ao cancelar agendamento: " + e.getMessage()));
+        }
+    }
+
     public void calcularCustoTotal() {
         BigDecimal custoHoraSala = BigDecimal.ZERO;
         BigDecimal custoHoraParticipantes = BigDecimal.ZERO;
@@ -126,7 +187,7 @@ public class AgendamentoBean implements Serializable {
         FacesContext context = FacesContext.getCurrentInstance();
         try {
             HttpSession session = (HttpSession) context.getExternalContext().getSession(false);
-            Colaborador usuarioLogado = (Colaborador) session.getAttribute("usuarioLogado");
+            Colaborador usuarioLogado = (session != null) ? (Colaborador) session.getAttribute("usuarioLogado") : null;
 
             if (usuarioLogado == null) {
                 context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro", "Sessão expirada. Faça login novamente."));
@@ -140,7 +201,10 @@ public class AgendamentoBean implements Serializable {
 
             SalaReuniao sala = salaReuniaoDAO.find(idSalaSelecionada);
             novoAgendamento.setSala(sala);
-            novoAgendamento.setSolicitante(usuarioLogado);
+
+            if (novoAgendamento.getSolicitante() == null) {
+                novoAgendamento.setSolicitante(usuarioLogado);
+            }
 
             List<Colaborador> participantes = new ArrayList<>();
             if (idsParticipantesSelecionados != null && colaboradorDAO != null) {
@@ -170,11 +234,19 @@ public class AgendamentoBean implements Serializable {
 
             calcularCustoTotal();
 
-            agendamentoReuniaoDAO.create(novoAgendamento);
+            if (novoAgendamento.getId() == null) {
+                if (novoAgendamento.getStatus() == null) {
+                    novoAgendamento.setStatus(StatusAgendamento.AGENDADO);
+                }
+                agendamentoReuniaoDAO.create(novoAgendamento);
+                context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Sucesso", "Agendamento criado com sucesso!"));
+            } else {
+                agendamentoReuniaoDAO.edit(novoAgendamento);
+                context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Sucesso", "Agendamento atualizado com sucesso!"));
+            }
+
             carregarDados();
             prepararNovoAgendamento();
-
-            context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Sucesso", "Agendamento criado com sucesso!"));
         } catch (Exception e) {
             context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro", "Falha ao salvar agendamento: " + e.getMessage()));
         }

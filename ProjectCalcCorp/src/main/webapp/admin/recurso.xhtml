@@ -63,6 +63,10 @@
                     <h:outputText value="#{r.nome}" style="font-weight: bold;" />
                 </p:column>
 
+                <p:column headerText="Categoria" style="width: 220px;">
+                    <h:outputText value="#{r.categoria}" />
+                </p:column>
+
                 <p:column headerText="Ações" style="width: 120px; text-align: center;">
                     <p:commandButton icon="pi pi-pencil" title="Editar"
                                      actionListener="#{recursoTecnologicoBean.prepararEdicao(r)}"
@@ -93,14 +97,21 @@
             <h:panelGrid id="pgRecurso" columns="2" cellpadding="5" style="width:100%;">
 
                 <p:outputLabel for="nome" value="Nome do Recurso:" />
-                <p:inputText id="nome" value="#{recursoTecnologicoBean.entidade.nome}" required="true" style="width:100%;" />
+                <p:inputText id="nome" value="#{recursoTecnologicoBean.entidade.nome}" required="true" 
+                             requiredMessage="Informe o nome do recurso." style="width:100%;" 
+                             placeholder="Ex: Projetor 4K, Webcam Full HD" />
+
+                <p:outputLabel for="categoria" value="Categoria:" />
+                <p:inputText id="categoria" value="#{recursoTecnologicoBean.entidade.categoria}" required="true" 
+                             requiredMessage="Informe a categoria do recurso." style="width:100%;" 
+                             placeholder="Ex: Audiovisual, Informática, Rede" />
 
             </h:panelGrid>
 
             <div style="text-align: right; margin-top: 15px;">
                 <p:commandButton value="Salvar" icon="pi pi-check" 
                                  actionListener="#{recursoTecnologicoBean.salvar}" 
-                                 update=":formRecurso:dtRecursos :formRecurso:messages" 
+                                 update=":formRecurso:dtRecursos :formRecurso:messages pgRecurso" 
                                  oncomplete="if (!args.validationFailed) PF('dlgRecurso').hide()" />
                 <p:commandButton value="Cancelar" icon="pi pi-times" onclick="PF('dlgRecurso').hide()" 
                                  type="button" styleClass="ui-button-flat" style="margin-left:5px;" />

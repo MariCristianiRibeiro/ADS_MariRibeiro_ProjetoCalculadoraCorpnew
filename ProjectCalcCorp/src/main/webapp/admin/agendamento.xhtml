@@ -59,6 +59,10 @@
                     <h:outputText value="#{a.id}" />
                 </p:column>
 
+                <p:column headerText="Reunião">
+                    <h:outputText value="#{empty a.nome ? '-' : a.nome}" style="font-weight: bold;" />
+                </p:column>
+
                 <p:column headerText="Solicitante">
                     <h:outputText value="#{a.solicitante.nome}" />
                 </p:column>
@@ -67,45 +71,74 @@
                     <h:outputText value="#{a.sala.nome} (Andar #{a.sala.andar})" />
                 </p:column>
 
-                <p:column headerText="Participantes" style="text-align: center; width: 120px;">
+                <p:column headerText="Participantes" style="text-align: center; width: 115px;">
                     <h:outputText value="#{a.participantes.size()} presente(s)" />
                 </p:column>
 
-                <p:column headerText="Recursos" style="text-align: center; width: 120px;">
+                <p:column headerText="Recursos" style="text-align: center; width: 105px;">
                     <h:outputText value="#{a.recursos.size()} item(ns)" />
                 </p:column>
 
-                <p:column headerText="Início">
+                <p:column headerText="Início" style="width: 130px;">
                     <h:outputText value="#{a.dataHoraInicio}">
                         <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Sao_Paulo" />
                     </h:outputText>
                 </p:column>
 
-                <p:column headerText="Duração (h)" style="width: 90px; text-align: center;">
+                <p:column headerText="Duração (h)" style="width: 85px; text-align: center;">
                     <h:outputText value="#{a.duracaoHoras}" />
                 </p:column>
 
-                <p:column headerText="Custo Total" style="width: 130px; text-align: right;">
-                    <h:outputText value="#{a.custoTotal}" style="font-weight: bold; color: #{a.custoTotal.doubleValue() > 500 ? '#d32f2f' : '#2e7d32'};">
+                <p:column headerText="Custo Total" style="width: 125px; text-align: right;">
+                    <h:outputText value="#{a.custoTotal}" style="font-weight: bold; color: #{a.custoTotal.doubleValue() gt 500 ? '#d32f2f' : '#2e7d32'};">
                         <f:convertNumber type="currency" currencySymbol="R$ " locale="pt_BR" />
                     </h:outputText>
                 </p:column>
 
-                <p:column headerText="Tipo" style="width: 100px; text-align: center;">
+                <p:column headerText="Tipo" style="width: 95px; text-align: center;">
                     <h:outputText value="#{a.tipo}" />
                 </p:column>
 
-                <p:column headerText="Status" style="width: 110px; text-align: center;">
-                    <h:outputText value="#{a.status}" />
+                <p:column headerText="Status" style="width: 105px; text-align: center;">
+                    <h:outputText value="#{a.status}" 
+                                  style="font-weight: bold; color: #{a.status.name() eq 'CANCELADO' ? '#d32f2f' : '#1565c0'};" />
+                </p:column>
+
+                <p:column headerText="Ações" style="width: 110px; text-align: center;">
+                    <p:commandButton icon="pi pi-pencil" title="Editar Agendamento"
+                                     actionListener="#{agendamentoBean.prepararEdicao(a)}"
+                                     oncomplete="PF('dlgNovo').show()"
+                                     update=":formNovoDialog:pgNovo :formNovoDialog:pnlAlerta"
+                                     disabled="#{a.status.name() eq 'CANCELADO'}"
+                                     styleClass="ui-button-warning ui-button-sm" style="margin-right: 5px;" />
+
+                    <p:commandButton icon="pi pi-ban" title="Cancelar Agendamento"
+                                     actionListener="#{agendamentoBean.cancelar(a)}"
+                                     update=":formAgendamento:dtAgendamentos :formAgendamento:messages"
+                                     disabled="#{a.status.name() eq 'CANCELADO'}"
+                                     styleClass="ui-button-danger ui-button-sm">
+                        <p:confirm header="Cancelar Reunião" message="Tem certeza que deseja cancelar este agendamento?" icon="pi pi-exclamation-triangle" />
+                    </p:commandButton>
                 </p:column>
             </p:dataTable>
         </p:panel>
     </h:form>
 
-    <!-- Modal Novo Agendamento -->
+    <!-- Diálogo de Confirmação -->
+    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="360">
+        <p:commandButton value="Não" type="button" styleClass="ui-confirmdialog-no ui-button-flat" />
+        <p:commandButton value="Sim" type="button" styleClass="ui-confirmdialog-yes" />
+    </p:confirmDialog>
+
+    <!-- Modal Novo / Editar Agendamento -->
     <p:dialog header="Calculadora de Custo de Reunião" widgetVar="dlgNovo" modal="true" resizable="false" width="550">
         <h:form id="formNovoDialog">
             <h:panelGrid id="pgNovo" columns="2" cellpadding="5" style="width:100%;">
+
+                <p:outputLabel for="nome" value="Nome da Reunião:" />
+                <p:inputText id="nome" value="#{agendamentoBean.novoAgendamento.nome}" required="true" 
+                             requiredMessage="Informe o nome da reunião." style="width:100%;" 
+                             placeholder="Ex: Alinhamento Sprint, Planejamento..." />
 
                 <p:outputLabel for="sala" value="Sala de Reunião:" />
                 <p:selectOneMenu id="sala" value="#{agendamentoBean.idSalaSelecionada}" required="true" style="width:100%;">
@@ -169,7 +202,7 @@
             <div style="text-align: right; margin-top: 20px;">
                 <p:commandButton value="Confirmar Agendamento" icon="pi pi-check" 
                                  actionListener="#{agendamentoBean.salvar}" 
-                                 update=":formAgendamento:dtAgendamentos :formAgendamento:messages pgNovo" 
+                                 update=":formAgendamento:dtAgendamentos :formAgendamento:messages pgNovo pnlAlerta" 
                                  oncomplete="if (!args.validationFailed) PF('dlgNovo').hide()" />
                 <p:commandButton value="Cancelar" icon="pi pi-times" onclick="PF('dlgNovo').hide()" 
                                  type="button" styleClass="ui-button-flat" style="margin-left:5px;" />
