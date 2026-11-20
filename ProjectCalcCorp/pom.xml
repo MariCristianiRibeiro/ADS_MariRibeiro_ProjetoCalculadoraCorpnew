@@ -27,6 +27,13 @@
             <version>13.0.6</version>
             <classifier>jakarta</classifier>
         </dependency>
+        <!-- dependência local do manhattan -->
+        <dependency>
+            <groupId>org.primefaces.themes</groupId>
+            <artifactId>manhattan</artifactId>
+            <version>7.0.0</version>
+        </dependency> 
+
         
     </dependencies>
     
