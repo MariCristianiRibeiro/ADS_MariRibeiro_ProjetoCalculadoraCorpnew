@@ -53,6 +53,7 @@ public class AgendamentoBean implements Serializable {
     private List<Long> idsParticipantesSelecionados;
     private List<Long> idsRecursosSelecionados;
     private boolean alertaEmail;
+    private String filtroNome;
 
     public AgendamentoBean() {
     }
@@ -65,6 +66,7 @@ public class AgendamentoBean implements Serializable {
 
     public void carregarDados() {
         try {
+            filtroNome = null;
             agendamentos = (agendamentoReuniaoDAO != null) ? agendamentoReuniaoDAO.findAll() : new ArrayList<>();
             salas = (salaReuniaoDAO != null) ? salaReuniaoDAO.findAll() : new ArrayList<>();
             recursosDisponiveis = (recursoTecnologicoDAO != null) ? recursoTecnologicoDAO.findAll() : new ArrayList<>();
@@ -76,6 +78,24 @@ public class AgendamentoBean implements Serializable {
             recursosDisponiveis = new ArrayList<>();
             colaboradoresDisponiveis = new ArrayList<>();
         }
+    }
+
+    public void pesquisar() {
+        try {
+            if (filtroNome == null || filtroNome.trim().isEmpty()) {
+                agendamentos = (agendamentoReuniaoDAO != null) ? agendamentoReuniaoDAO.findAll() : new ArrayList<>();
+            } else {
+                agendamentos = (agendamentoReuniaoDAO != null) ? agendamentoReuniaoDAO.buscarPorNome(filtroNome) : new ArrayList<>();
+            }
+        } catch (Exception e) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro", "Falha ao pesquisar agendamentos: " + e.getMessage()));
+        }
+    }
+
+    public void limparPesquisa() {
+        this.filtroNome = null;
+        this.agendamentos = (agendamentoReuniaoDAO != null) ? agendamentoReuniaoDAO.findAll() : new ArrayList<>();
     }
 
     public void prepararNovoAgendamento() {
@@ -279,6 +299,9 @@ public class AgendamentoBean implements Serializable {
 
     public boolean isAlertaEmail() { return alertaEmail; }
     public void setAlertaEmail(boolean alertaEmail) { this.alertaEmail = alertaEmail; }
+
+    public String getFiltroNome() { return filtroNome; }
+    public void setFiltroNome(String filtroNome) { this.filtroNome = filtroNome; }
 
     public StatusAgendamento[] getStatusAgendamentoValues() { return StatusAgendamento.values(); }
     public TipoReuniao[] getTiposReuniao() { return TipoReuniao.values(); }

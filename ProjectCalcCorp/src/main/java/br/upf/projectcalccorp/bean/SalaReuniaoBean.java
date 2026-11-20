@@ -27,6 +27,7 @@ public class SalaReuniaoBean implements Serializable {
     private SalaReuniao entidade;
     private List<SalaReuniao> lista;
     private String termoBusca;
+    private List<SalaReuniao> salas;
 
     public SalaReuniaoBean() {
     }
@@ -39,6 +40,7 @@ public class SalaReuniaoBean implements Serializable {
 
     public void carregarLista() {
         try {
+            termoBusca = null;
             lista = (dao != null) ? dao.findAll() : new ArrayList<>();
         } catch (Exception e) {
             lista = new ArrayList<>();
@@ -51,11 +53,21 @@ public class SalaReuniaoBean implements Serializable {
     }
 
     public void pesquisar() {
-        if (termoBusca != null && !termoBusca.trim().isEmpty()) {
-            lista = dao.buscarPorNome(termoBusca);
-        } else {
-            carregarLista();
+        try {
+            if (termoBusca != null && !termoBusca.trim().isEmpty()) {
+                lista = dao.buscarPorNome(termoBusca);
+            } else {
+                carregarLista();
+            }
+        } catch (Exception e) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro", "Falha ao pesquisar salas: " + e.getMessage()));
         }
+    }
+
+    public void limparPesquisa() {
+        this.termoBusca = null;
+        carregarLista();
     }
 
     public void novo() {
@@ -109,7 +121,7 @@ public class SalaReuniaoBean implements Serializable {
     public void setLista(List<SalaReuniao> lista) { this.lista = lista; }
 
     public List<SalaReuniao> getSalas() { return lista; }
-    public void setSalas(List<SalaReuniao> salas) { this.lista = salas; }
+    public void setSalas(List<SalaReuniao> salas) { this.salas = salas; }
 
     public String getTermoBusca() { return termoBusca; }
     public void setTermoBusca(String termoBusca) { this.termoBusca = termoBusca; }

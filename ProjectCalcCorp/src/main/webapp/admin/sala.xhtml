@@ -46,7 +46,29 @@
                                      styleClass="ui-button-success" style="margin-right: 10px;" />
                     <p:commandButton value="Atualizar Lista" icon="pi pi-refresh" 
                                      actionListener="#{salaBean.carregarSalas}" 
-                                     update="formSala:dtSalas" 
+                                     process="@this"
+                                     update="dtSalas txtBuscaSala" 
+                                     styleClass="ui-button-secondary" />
+                </p:toolbarGroup>
+
+                <p:toolbarGroup align="right">
+                    <p:inputText id="txtBuscaSala"
+                                 value="#{salaBean.termoBusca}"
+                                 placeholder="Buscar por nome da sala..."
+                                 style="width: 250px; margin-right: 6px;" />
+
+                    <p:commandButton value="Buscar"
+                                     icon="pi pi-search"
+                                     actionListener="#{salaBean.pesquisar}"
+                                     process="@this txtBuscaSala"
+                                     update="dtSalas messages"
+                                     style="margin-right: 6px;" />
+
+                    <p:commandButton value="Limpar"
+                                     icon="pi pi-times"
+                                     actionListener="#{salaBean.limparPesquisa}"
+                                     process="@this"
+                                     update="dtSalas txtBuscaSala"
                                      styleClass="ui-button-secondary" />
                 </p:toolbarGroup>
             </p:toolbar>

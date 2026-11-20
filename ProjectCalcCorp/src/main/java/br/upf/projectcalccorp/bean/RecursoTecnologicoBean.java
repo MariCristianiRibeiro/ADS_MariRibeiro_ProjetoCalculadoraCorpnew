@@ -39,6 +39,7 @@ public class RecursoTecnologicoBean implements Serializable {
 
     public void carregarLista() {
         try {
+            termoBusca = null;
             lista = (dao != null) ? dao.findAll() : new ArrayList<>();
         } catch (Exception e) {
             lista = new ArrayList<>();
@@ -54,8 +55,14 @@ public class RecursoTecnologicoBean implements Serializable {
                 carregarLista();
             }
         } catch (Exception e) {
-            carregarLista();
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro", "Falha ao pesquisar recursos: " + e.getMessage()));
         }
+    }
+
+    public void limparPesquisa() {
+        this.termoBusca = null;
+        carregarLista();
     }
 
     public void novo() {

@@ -37,6 +37,7 @@ public class ColaboradorBean implements Serializable {
 
     public void carregarLista() {
         try {
+            termoBusca = null;
             lista = (dao != null) ? dao.findAll() : new ArrayList<>();
         } catch (Exception e) {
             lista = new ArrayList<>();
@@ -49,11 +50,21 @@ public class ColaboradorBean implements Serializable {
     }
 
     public void pesquisar() {
-        if (termoBusca != null && !termoBusca.trim().isEmpty()) {
-            lista = dao.buscarPorMatriculaOuEmail(termoBusca);
-        } else {
-            carregarLista();
+        try {
+            if (termoBusca != null && !termoBusca.trim().isEmpty()) {
+                lista = dao.buscarPorNome(termoBusca);
+            } else {
+                carregarLista();
+            }
+        } catch (Exception e) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro", "Falha ao pesquisar colaboradores: " + e.getMessage()));
         }
+    }
+
+    public void limparPesquisa() {
+        this.termoBusca = null;
+        carregarLista();
     }
 
     public void novo() {
